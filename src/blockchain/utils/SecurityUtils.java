@@ -1,6 +1,7 @@
 package blockchain.utils;
 
 import java.security.MessageDigest;
+import java.security.SecureRandom;
 
 public class SecurityUtils {
     /* Applies Sha256 to a string and returns a hash. */
@@ -20,5 +21,34 @@ public class SecurityUtils {
         catch(Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static int generateMagicNumber() {
+        SecureRandom srand = new SecureRandom();
+
+        return srand.nextInt();
+    }
+
+    public static String generateRequiredPrefix(String character, int totalCharCount) {
+        if(totalCharCount <= 0) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        for(int i = 0; i < totalCharCount; i++) {
+            sb.append(character);
+        }
+
+        return sb.toString();
+    }
+
+
+    public static boolean isValidHashcode(String prefix, String hashCode) {
+        if(hashCode == null) {
+            return false;
+        }
+
+        return hashCode.startsWith(prefix);
     }
 }
