@@ -15,9 +15,10 @@ public class BlockChainManager {
         this.blockChain = new BlockChain();
     }
 
-    public void manageBlockChain() {
+    public void manageBlockChain(String requiredPrefixChar, int totalCharCount) {
+        System.out.println("Inside the manage blockchain method");
         for (int i = 0; i < size; i++) {
-            Block block = blockChain.generateBlock();
+            Block block = blockChain.generateBlock(requiredPrefixChar, totalCharCount);
             blockChain.addBlock(block);
         }
 

@@ -12,10 +12,13 @@ import lombok.Setter;
 public class Block {
     private int id;
     private long timeStamp;
+    private int magicNumber;
     private String previousHash;
     private String currentHash;
+    private int generationTime;
 
     public String toString() {
-        return String.format("Block:\nId: %d\nTimestamp: %d\nHash of the previous block:\n%s\nHash of the block:\n%s\n", this.id, this.timeStamp, this.previousHash, this.currentHash);
+        return String.format("Block:\nId: %d\nTimestamp: %d\nMagic number:%d\nHash of the previous block:\n%s\nHash of the block:\n%s\nBlock was generating for %d seconds\n",
+                this.id, this.timeStamp, this.magicNumber, this.previousHash, this.currentHash, this.generationTime);
     }
 }

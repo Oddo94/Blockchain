@@ -16,19 +16,46 @@ public class BlockChain {
         blockChain.add(block);
     }
 
-    public Block generateBlock() {
-        int id = -1;
+    public Block generateBlock(String requiredPrefixChar, int totalCharCount) {
+        System.out.println("Inside the generate block method");
+        //Retrieves the elements from which the hashcode of the block will be generated
+        int id = getBlockIndex(blockChain);
         long timeStamp = new Date().getTime();
-        String previousHash = null;
+        int magicNumber = SecurityUtils.generateMagicNumber();
+        String previousHash = getPreviousBlockHash(blockChain);
+
+        //This variable will hold the hashcode value once this complies to all the requirements
         String currentHash = null;
-        String hashMethodInput = null;
 
-        id = getBlockIndex(blockChain);
-        hashMethodInput = String.format("%d%d%s%s", id, timeStamp, previousHash, currentHash);
-        previousHash = getPreviousBlockHash(blockChain);
-        currentHash = SecurityUtils.applySha256(hashMethodInput);
+        //Creates the input which will be used to generate the hashcode
+        String hashMethodInput = String.format("%d%d%%ds%s", id, timeStamp, magicNumber, previousHash, currentHash);
 
-        Block block = new Block(id, timeStamp, previousHash, currentHash);
+        //Retrieves the required prefix of the hashcode(containing the specified character and having the specified length)
+        String hashCodePrefix = SecurityUtils.generateRequiredPrefix(requiredPrefixChar, totalCharCount);
+
+        long startTime = System.currentTimeMillis();
+        while(true) {
+            System.out.println("Trying to find a valid hashcode....");
+            String generatedHashCode = SecurityUtils.applySha256(hashMethodInput);
+            boolean isValidHashCode = SecurityUtils.isValidHashcode(hashCodePrefix, generatedHashCode);
+
+            System.out.println(String.format("Magic number: %d\nGenerated hashcode: %s\nIs valid hashcode: %s\n", magicNumber, generatedHashCode, isValidHashCode));
+
+            if(isValidHashCode) {
+                System.out.println("Found the correct hashcode! Exiting the loop...");
+                currentHash = generatedHashCode;
+                break;
+            }
+
+            //If the generated hashcode does not start with the required prefix a new magic number is generated and the whole process repeats
+            magicNumber = SecurityUtils.generateMagicNumber();
+            hashMethodInput = String.format("%d%d%%ds%s", id, timeStamp, magicNumber, previousHash, currentHash);
+        }
+
+        long endTime = System.currentTimeMillis();
+        int generationTime =(int) (endTime - startTime) / 1000;
+
+        Block block = new Block(id, timeStamp, magicNumber, previousHash, currentHash, generationTime);
 
         return block;
     }
@@ -64,11 +91,11 @@ public class BlockChain {
                 currentBlockPreviousHash = block.getPreviousHash();
             }
 
-             if(!currentBlockPreviousHash.equals(previousBlockCurrentHash)) {
-                 return false;
-             }
+            if(!currentBlockPreviousHash.equals(previousBlockCurrentHash)) {
+                return false;
+            }
 
-             //Sets the hash of the previous block for comparison with the next block from the list
+            //Sets the hash of the previous block for comparison with the next block from the list
             previousBlockCurrentHash = block.getCurrentHash();
         }
 
