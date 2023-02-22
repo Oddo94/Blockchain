@@ -13,7 +13,7 @@ public class Main {
         int blockChainSize = 5;
 
         BlockChainManager blockChainManager = new BlockChainManager(blockChainSize);
-        blockChainManager.manageBlockChain(requiredPrefixChar, totalCharCount);
+        blockChainManager.manageBlockChain();
 
         try {
             Thread.sleep(5000);

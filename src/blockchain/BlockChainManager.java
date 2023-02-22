@@ -22,7 +22,7 @@ public class BlockChainManager {
         this.blockChain = new BlockChain();
     }
 
-    public void manageBlockChain(String requiredPrefixChar, int totalCharCount) {
+    public void manageBlockChain() {
 //        int currentBlockChainSize = blockChain.getSize();
 //        ExecutorService threadPool = Executors.newFixedThreadPool(5);
 //        while(currentBlockChainSize < maxSize) {
@@ -47,7 +47,7 @@ public class BlockChainManager {
         int currentBlockChainSize = blockChain.getSize();
         ExecutorService threadPool = Executors.newFixedThreadPool(5);
         for(int i = 0; i < maxSize; i++) {
-            BlockGenerator blockGenerator = new BlockGenerator(requiredPrefixChar, totalCharCount, blockChain, maxSize);
+            BlockGenerator blockGenerator = new BlockGenerator(blockChain, maxSize);
             threadPool.execute(blockGenerator);
         }
         blockChain.display();

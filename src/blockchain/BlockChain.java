@@ -6,19 +6,26 @@ import java.util.Date;
 import java.util.LinkedList;
 
 public class BlockChain {
-    private LinkedList<Block> blockChain;
+    private volatile LinkedList<Block> blockChain;
+    private volatile int prefixLength;
+    private String prefixChar;
 
     public BlockChain() {
         this.blockChain = new LinkedList<>();
+        prefixLength = 0;
+        prefixChar = "0";
     }
 
     public synchronized void addBlock(Block block) {
-        if(blockChain.size() == 5) {
+        if (blockChain.size() == 5) {
             System.out.println("MAXIMUM BLOCKCHAIN SIZE REACHED!");
             return;
         }
 
         blockChain.add(block);
+        //Updates the hashcode prefix rules accrding to the time needed to generate the block(if it's less than 60 seconds it increases the complexity of the prefix otherwise it decreases it)
+        regulateBlockCreation(block);
+
     }
 
 //    public Block generateBlock(String requiredPrefixChar, int totalCharCount) {
@@ -71,7 +78,7 @@ public class BlockChain {
         }
     }
 
-    public boolean isValid() {
+    public boolean isValidBlockchain() {
         int blockChainSize = blockChain.size();
 
 //        if(blockChainSize == 0) {
@@ -79,24 +86,24 @@ public class BlockChain {
 //        }
 
         //If a single element is present no other checks are performed and the blockchain is considered valid
-        if(blockChainSize == 1) {
+        if (blockChainSize == 1) {
             return true;
         }
 
         String previousBlockCurrentHash = blockChain.get(0).getCurrentHash();
-        for(int i = 0; i < blockChain.size(); i++) {
+        for (int i = 0; i < blockChain.size(); i++) {
             Block block = blockChain.get(i);
 
             String currentBlockPreviousHash = null;
 
             //For the first block there's no previous hash stored
-            if(i == 0) {
+            if (i == 0) {
                 currentBlockPreviousHash = block.getCurrentHash();
             } else {
                 currentBlockPreviousHash = block.getPreviousHash();
             }
 
-            if(!currentBlockPreviousHash.equals(previousBlockCurrentHash)) {
+            if (!currentBlockPreviousHash.equals(previousBlockCurrentHash)) {
                 return false;
             }
 
@@ -107,17 +114,42 @@ public class BlockChain {
         return true;
     }
 
+    public boolean isValidBlock(Block newBlock) {
+        if(blockChain.size() == 0) {
+            return true;
+        }
+
+        if(newBlock == null) {
+            return false;
+        }
+
+        //Retrieves the last valid block that was inserted into the blockchain
+        int lastValidBlockIndex = blockChain.size() - 1;
+        Block lastValidBlock = blockChain.get(lastValidBlockIndex);
+
+        //Checks if the previous hash from the new block matches the current hash of the last valid block from the blockchain
+        boolean hashCodesMatch = newBlock.getPreviousHash().equals(lastValidBlock.getCurrentHash());
+
+        String newBlockCurrentHash = newBlock.getCurrentHash();
+        String requiredPrefix = SecurityUtils.generateRequiredPrefix(prefixChar, prefixLength);
+
+        //The prefix must not be an empty string and it must be present at the beginning of the hashcode
+        boolean isValidPrefix = !"".equals(requiredPrefix) && newBlockCurrentHash.startsWith(requiredPrefix);
+
+        return hashCodesMatch && isValidPrefix;
+    }
+
     public synchronized int getBlockIndex() {
         int currentListSize = this.blockChain.size();
 
         //Empty list scenario
-        if(currentListSize == 0) {
+        if (currentListSize == 0) {
             return 1;
         }
 
         Block lastBlock = this.blockChain.get(currentListSize - 1);
 
-        if(lastBlock == null) {
+        if (lastBlock == null) {
             return 1;
         }
 
@@ -132,13 +164,13 @@ public class BlockChain {
         int currentListSize = this.blockChain.size();
 
         //Empty list scenario
-        if(currentListSize == 0) {
+        if (currentListSize == 0) {
             return "0";
         }
 
         Block lastBlock = this.blockChain.get(currentListSize - 1);
 
-        if(lastBlock == null) {
+        if (lastBlock == null) {
             return "0";
         }
 
@@ -149,4 +181,38 @@ public class BlockChain {
     public synchronized int getSize() {
         return this.blockChain.size();
     }
+
+    private void regulateBlockCreation(Block newBlock) {
+        if (newBlock == null) {
+            return;
+        }
+
+        int timeRequiredForGeneration = newBlock.getGenerationTime();
+
+        String message = null;
+        if(timeRequiredForGeneration > 60) {
+            if(prefixLength > 0) {
+                prefixLength--;
+                message = String.format("N was decreased by %d", prefixLength);
+            }
+        } else if(timeRequiredForGeneration < 10){
+            prefixLength++;
+            message = String.format("N was increased by %d", prefixLength);
+        } else {
+            message = "N stays the same";
+        }
+
+        newBlock.setAdditionalInfo(message);
+    }
+
+    public int getPrefixLength() {
+        return this.prefixLength;
+    }
+
+    public String getPrefixChar() {
+        return this.prefixChar;
+    }
+
+
+
 }
