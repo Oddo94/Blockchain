@@ -46,7 +46,7 @@ public class BlockChainManager {
 
         int currentBlockChainSize = blockChain.getSize();
         ExecutorService threadPool = Executors.newFixedThreadPool(5);
-        for(int i = 0; i < maxSize; i++) {
+        for(int i = 0; i < 10; i++) {
             BlockGenerator blockGenerator = new BlockGenerator(blockChain, maxSize);
             threadPool.execute(blockGenerator);
         }

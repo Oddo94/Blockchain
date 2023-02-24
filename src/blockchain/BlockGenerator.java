@@ -122,10 +122,10 @@ public class BlockGenerator implements Runnable {
         //int generationTime =(int) (endTime - startTime) / 1000;
 
         //Checks again just in case another thread has generated a valid block in the meantime
-        if(blockChain.getSize() > 0) {
-            id = blockChain.getBlockIndex();
-            previousHash = blockChain.getPreviousBlockHash();
-        }
+//        if(blockChain.getSize() > 0) {
+//            id = blockChain.getBlockIndex();
+//            previousHash = blockChain.getPreviousBlockHash();
+//        }
 
 
         //Block block = new Block(id, timeStamp, magicNumber, previousHash, currentHash, generationTime);

@@ -2,16 +2,20 @@ package blockchain;
 
 import blockchain.model.Block;
 import blockchain.utils.SecurityUtils;
+
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 
 public class BlockChain {
-    private volatile LinkedList<Block> blockChain;
+    private volatile List<Block> blockChain;
+    private static volatile int blockChainSize;
     private volatile int prefixLength;
     private String prefixChar;
 
     public BlockChain() {
-        this.blockChain = new LinkedList<>();
+        this.blockChain = Collections.synchronizedList(new LinkedList<Block>());;
         prefixLength = 0;
         prefixChar = "0";
     }
@@ -22,9 +26,12 @@ public class BlockChain {
             return;
         }
 
+        int newId = blockChain.size() + 1;
+        block.setId(newId);
         blockChain.add(block);
         //Updates the hashcode prefix rules accrding to the time needed to generate the block(if it's less than 60 seconds it increases the complexity of the prefix otherwise it decreases it)
         regulateBlockCreation(block);
+        blockChainSize++;
 
     }
 
@@ -114,7 +121,7 @@ public class BlockChain {
         return true;
     }
 
-    public boolean isValidBlock(Block newBlock) {
+    public synchronized boolean isValidBlock(Block newBlock) {
         if(blockChain.size() == 0) {
             return true;
         }
@@ -156,6 +163,7 @@ public class BlockChain {
         //ID generation when the blockchain contains at least an element
         int previousBlockId = lastBlock.getId();
         int newBlockId = previousBlockId + 1;
+//        int newBlockId = blockChainSize + 1;
 
         return newBlockId;
     }
@@ -179,7 +187,8 @@ public class BlockChain {
     }
 
     public synchronized int getSize() {
-        return this.blockChain.size();
+        //return this.blockChain.size();
+        return blockChainSize;
     }
 
     private void regulateBlockCreation(Block newBlock) {
