@@ -4,13 +4,11 @@ import blockchain.model.Block;
 import blockchain.utils.SecurityUtils;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 public class BlockChain {
     private volatile List<Block> blockChain;
-    private static volatile int blockChainSize;
     private volatile int prefixLength;
     private String prefixChar;
 
@@ -26,58 +24,19 @@ public class BlockChain {
             return;
         }
 
+        int currentBlockId = block.getId();
         int newId = blockChain.size() + 1;
-        block.setId(newId);
+
+        //Checks again to make sure that the id of the new block is correct
+        if(currentBlockId != newId) {
+            block.setId(newId);
+        }
+
         blockChain.add(block);
-        //Updates the hashcode prefix rules accrding to the time needed to generate the block(if it's less than 60 seconds it increases the complexity of the prefix otherwise it decreases it)
+        //Updates the hashcode prefix rules according to the time needed to generate the block(if it's less than 60 seconds it increases the complexity of the prefix otherwise it decreases it)
         regulateBlockCreation(block);
-        blockChainSize++;
 
     }
-
-//    public Block generateBlock(String requiredPrefixChar, int totalCharCount) {
-//        System.out.println("Inside the generate block method");
-//        //Retrieves the elements from which the hashcode of the block will be generated
-//        int id = getBlockIndex(blockChain);
-//        long timeStamp = new Date().getTime();
-//        int magicNumber = SecurityUtils.generateMagicNumber();
-//        String previousHash = getPreviousBlockHash(blockChain);
-//
-//        //This variable will hold the hashcode value once this complies to all the requirements
-//        String currentHash = null;
-//
-//        //Creates the input which will be used to generate the hashcode
-//        String hashMethodInput = String.format("%d%d%%ds%s", id, timeStamp, magicNumber, previousHash, currentHash);
-//
-//        //Retrieves the required prefix of the hashcode(containing the specified character and having the specified length)
-//        String hashCodePrefix = SecurityUtils.generateRequiredPrefix(requiredPrefixChar, totalCharCount);
-//
-//        long startTime = System.currentTimeMillis();
-//        while(true) {
-//            System.out.println("Trying to find a valid hashcode....");
-//            String generatedHashCode = SecurityUtils.applySha256(hashMethodInput);
-//            boolean isValidHashCode = SecurityUtils.isValidHashcode(hashCodePrefix, generatedHashCode);
-//
-//            System.out.println(String.format("Magic number: %d\nGenerated hashcode: %s\nIs valid hashcode: %s\n", magicNumber, generatedHashCode, isValidHashCode));
-//
-//            if(isValidHashCode) {
-//                System.out.println("Found the correct hashcode! Exiting the loop...");
-//                currentHash = generatedHashCode;
-//                break;
-//            }
-//
-//            //If the generated hashcode does not start with the required prefix a new magic number is generated and the whole process repeats
-//            magicNumber = SecurityUtils.generateMagicNumber();
-//            hashMethodInput = String.format("%d%d%%ds%s", id, timeStamp, magicNumber, previousHash, currentHash);
-//        }
-//
-//        long endTime = System.currentTimeMillis();
-//        int generationTime =(int) (endTime - startTime) / 1000;
-//
-//        Block block = new Block(id, timeStamp, magicNumber, previousHash, currentHash, generationTime);
-//
-//        return block;
-//    }
 
     public void display() {
         for (Block currentBlock : blockChain) {
@@ -88,9 +47,9 @@ public class BlockChain {
     public boolean isValidBlockchain() {
         int blockChainSize = blockChain.size();
 
-//        if(blockChainSize == 0) {
-//            return false;
-//        }
+        if(blockChainSize == 0) {
+            return false;
+        }
 
         //If a single element is present no other checks are performed and the blockchain is considered valid
         if (blockChainSize == 1) {
@@ -163,7 +122,6 @@ public class BlockChain {
         //ID generation when the blockchain contains at least an element
         int previousBlockId = lastBlock.getId();
         int newBlockId = previousBlockId + 1;
-//        int newBlockId = blockChainSize + 1;
 
         return newBlockId;
     }
@@ -187,8 +145,8 @@ public class BlockChain {
     }
 
     public synchronized int getSize() {
-        //return this.blockChain.size();
-        return blockChainSize;
+        return this.blockChain.size();
+        //return blockChainSize;
     }
 
     private void regulateBlockCreation(Block newBlock) {
