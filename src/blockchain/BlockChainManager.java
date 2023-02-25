@@ -1,28 +1,46 @@
 package blockchain;
+import lombok.Getter;
 
-import blockchain.model.Block;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+@Getter
 public class BlockChainManager {
-    private int size;
+    private int maxSize;
     private BlockChain blockChain;
+    private int numberOfThreads;
 
-    public BlockChainManager(int blockChainSize) {
+    public BlockChainManager(int blockChainSize, int numberOfThreads) {
         if(blockChainSize <= 0) {
-            this.size = 1;
+            this.maxSize = 1;
         }
 
-        this.size = blockChainSize;
+        this.maxSize = blockChainSize;
         this.blockChain = new BlockChain();
+        this.numberOfThreads = numberOfThreads;
     }
 
-    public void manageBlockChain(String requiredPrefixChar, int totalCharCount) {
-        System.out.println("Inside the manage blockchain method");
-        for (int i = 0; i < size; i++) {
-            Block block = blockChain.generateBlock(requiredPrefixChar, totalCharCount);
-            blockChain.addBlock(block);
+    public void manageBlockChain() {
+        int currentBlockChainSize = blockChain.getSize();
+        ExecutorService threadPool = Executors.newFixedThreadPool(numberOfThreads);
+        for(int i = 0; i < numberOfThreads; i++) {
+            BlockGenerator blockGenerator = new BlockGenerator(blockChain, maxSize);
+            threadPool.execute(blockGenerator);
+        }
+        blockChain.display();
+        threadPool.shutdown();
+
+        try {
+            if(!threadPool.awaitTermination(10, TimeUnit.SECONDS)) {
+               threadPool.shutdownNow();
+            }
+        } catch (InterruptedException ex) {
+            threadPool.shutdownNow();
+            Thread.currentThread().interrupt();
         }
 
-        blockChain.display();
+
     }
 
 
