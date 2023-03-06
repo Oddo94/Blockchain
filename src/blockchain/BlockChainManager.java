@@ -23,7 +23,7 @@ public class BlockChainManager {
 
     public void manageBlockChain() {
         int currentBlockChainSize = blockChain.getSize();
-        ExecutorService threadPool = Executors.newFixedThreadPool(numberOfThreads);
+        ExecutorService threadPool = Executors.newFixedThreadPool(5);
         for(int i = 0; i < numberOfThreads; i++) {
             BlockGenerator blockGenerator = new BlockGenerator(blockChain, maxSize);
             threadPool.execute(blockGenerator);

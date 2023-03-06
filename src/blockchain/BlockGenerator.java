@@ -77,7 +77,7 @@ public class BlockGenerator implements Runnable {
         magicNumber = SecurityUtils.generateMagicNumber();
         hashMethodInput = String.format("%d%d%%ds%s", id, timeStamp, magicNumber, previousHash, currentHash);
 
-        Block block = new Block(id, minerThreadNumber, timeStamp, magicNumber, previousHash, currentHash, 0, null);
+        Block block = new Block(id, minerThreadNumber, timeStamp, magicNumber, previousHash, currentHash, null,  0, null);
 
         return block;
     }

@@ -3,17 +3,20 @@ package blockchain;
 import blockchain.model.Block;
 import blockchain.utils.SecurityUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 public class BlockChain {
     private volatile List<Block> blockChain;
+    private volatile List<String> messageList;
     private volatile int prefixLength;
     private String prefixChar;
 
     public BlockChain() {
-        this.blockChain = Collections.synchronizedList(new LinkedList<Block>());;
+        this.blockChain = Collections.synchronizedList(new LinkedList<Block>());
+        this.messageList = Collections.synchronizedList(new ArrayList<String>());
         prefixLength = 0;
         prefixChar = "0";
     }
@@ -180,6 +183,9 @@ public class BlockChain {
         return this.prefixChar;
     }
 
+    public synchronized void addMessage(String newMessage) {
+        messageList.add(newMessage);
+    }
 
 
 }
