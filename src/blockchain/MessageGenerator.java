@@ -22,7 +22,7 @@ public class MessageGenerator implements Runnable{
 
     }
 
-    private String generateRandomMessage() {
+    public String generateRandomMessage() {
         String messageAuthor = getRandomMessageAuthor();
         UUID randomMessage= UUID.randomUUID();
 

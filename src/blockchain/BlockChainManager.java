@@ -1,9 +1,11 @@
 package blockchain;
 import lombok.Getter;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 @Getter
 public class BlockChainManager {
@@ -12,36 +14,62 @@ public class BlockChainManager {
     private int numberOfThreads;
 
     public BlockChainManager(int blockChainSize, int numberOfThreads) {
-        if(blockChainSize <= 0) {
-            this.maxSize = 1;
-        }
+//        if(blockChainSize <= 0) {
+//            this.maxSize = 1;
+//        }
+
+        int availableThreads = Runtime.getRuntime().availableProcessors();
 
         this.maxSize = blockChainSize;
+//        this.maxSize = 5;
         this.blockChain = new BlockChain();
-        this.numberOfThreads = numberOfThreads;
+        this.numberOfThreads = numberOfThreads > availableThreads ? availableThreads : numberOfThreads;
     }
 
+    //ORIGINAL VERSION
+//    public void manageBlockChain() {
+//        int currentBlockChainSize = blockChain.getSize();
+//        ExecutorService threadPool = Executors.newFixedThreadPool(numberOfThreads);
+//        for(int i = 0; i < numberOfThreads; i++) {
+////            if(i == 4) {
+////                MessageGenerator messageGenerator = new MessageGenerator(blockChain);
+////                threadPool.execute(messageGenerator);
+////            }
+//
+//            BlockGenerator blockGenerator = new BlockGenerator(blockChain, maxSize);
+//            threadPool.execute(blockGenerator);
+//
+//        }
+//        blockChain.display();
+//        threadPool.shutdown();
+//
+//        try {
+//            if(!threadPool.awaitTermination(10, TimeUnit.SECONDS)) {
+//               threadPool.shutdownNow();
+//            }
+//        } catch (InterruptedException ex) {
+//            threadPool.shutdownNow();
+//            Thread.currentThread().interrupt();
+//        }
+//
+//
+//    }
+
+    //TEST VERSION
     public void manageBlockChain() {
-        int currentBlockChainSize = blockChain.getSize();
-        ExecutorService threadPool = Executors.newFixedThreadPool(5);
-        for(int i = 0; i < numberOfThreads; i++) {
-            BlockGenerator blockGenerator = new BlockGenerator(blockChain, maxSize);
-            threadPool.execute(blockGenerator);
-        }
-        blockChain.display();
+        //int currentBlockChainSize = blockChain.getSize();
+        ExecutorService threadPool = Executors.newFixedThreadPool(numberOfThreads);
+        IntStream.range(1, numberOfThreads + 1)
+                .mapToObj(i -> new BlockGenerator(blockChain, maxSize))
+                .forEach(threadPool::submit);
+
         threadPool.shutdown();
 
         try {
-            if(!threadPool.awaitTermination(10, TimeUnit.SECONDS)) {
-               threadPool.shutdownNow();
-            }
-        } catch (InterruptedException ex) {
-            threadPool.shutdownNow();
-            Thread.currentThread().interrupt();
+            threadPool.awaitTermination(5, TimeUnit.SECONDS);
+        } catch(InterruptedException ex) {
+            ex.printStackTrace();
         }
-
-
     }
-
 
 }

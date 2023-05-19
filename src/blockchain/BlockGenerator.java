@@ -5,13 +5,21 @@ import blockchain.utils.SecurityUtils;
 import lombok.AllArgsConstructor;
 
 import java.util.Date;
+import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @AllArgsConstructor
 public class BlockGenerator implements Runnable {
+//    int iterations = 1;
+//    CountDownLatch latch;
     private BlockChain blockChain;
     private int maxSize;
+
+//    public BlockGenerator(int iterations, CountDownLatch latch) {
+//        this.iterations = iterations;
+//        this.latch = latch;
+//    }
 
     @Override
     public void run() {
@@ -23,7 +31,7 @@ public class BlockGenerator implements Runnable {
         Block generatedBlock = null;
 
         long startTime = System.currentTimeMillis();
-        while(currentBlockChainSize < maxSize) {
+        while(currentBlockChainSize <= maxSize) {
             int newBlockId = blockChain.getBlockIndex();
             String previousBlockHash = blockChain.getPreviousBlockHash();
 
@@ -66,8 +74,11 @@ public class BlockGenerator implements Runnable {
         //This variable will hold the hashcode value once this complies to all the requirements
         String currentHash = null;
 
+        //Gets the currently generated messages from the blockchain
+        String blockChainMessage = new MessageGenerator(blockChain).generateRandomMessage();
+
         //Creates the input which will be used to generate the hashcode
-        String hashMethodInput = String.format("%d%d%%ds%s", id, timeStamp, magicNumber, previousHash, currentHash);
+        String hashMethodInput = String.format("%d%d%%ds%s%s", id, timeStamp, magicNumber, previousHash, currentHash, blockChainMessage);
 
         //Retrieves the required prefix of the hashcode(containing the specified character and having the specified length)
         String hashCodePrefix = SecurityUtils.generateRequiredPrefix(requiredPrefixChar, totalCharCount);
@@ -77,7 +88,7 @@ public class BlockGenerator implements Runnable {
         magicNumber = SecurityUtils.generateMagicNumber();
         hashMethodInput = String.format("%d%d%%ds%s", id, timeStamp, magicNumber, previousHash, currentHash);
 
-        Block block = new Block(id, minerThreadNumber, timeStamp, magicNumber, previousHash, currentHash, null,  0, null);
+        Block block = new Block(id, minerThreadNumber, timeStamp, magicNumber, previousHash, currentHash, blockChainMessage,  0, null);
 
         return block;
     }

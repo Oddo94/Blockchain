@@ -7,35 +7,41 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class BlockChain {
-    private volatile List<Block> blockChain;
+    private List<Block> blockChain;
     private volatile List<String> messageList;
     private volatile int prefixLength;
     private String prefixChar;
+    private static volatile AtomicInteger currentBlockIndex = new AtomicInteger(0);//CHANGE!!
 
     public BlockChain() {
         this.blockChain = Collections.synchronizedList(new LinkedList<Block>());
         this.messageList = Collections.synchronizedList(new ArrayList<String>());
         prefixLength = 0;
         prefixChar = "0";
+        currentBlockIndex.getAndIncrement();
     }
 
     public synchronized void addBlock(Block block) {
-        if (blockChain.size() == 5) {
-            System.out.println("MAXIMUM BLOCKCHAIN SIZE REACHED!");
-            return;
-        }
+//        if (currentBlockIndex.get() == 6) {
+//            System.out.println("MAXIMUM BLOCKCHAIN SIZE REACHED!");
+//            return;
+//        }
 
         int currentBlockId = block.getId();
-        int newId = blockChain.size() + 1;
+//        int newId = blockChain.size() + 1;
+        int newId = currentBlockIndex.get();//CHANGE!!
 
         //Checks again to make sure that the id of the new block is correct
         if(currentBlockId != newId) {
-            block.setId(newId);
+            //block.setId(newId);
+            block.setId(currentBlockIndex.get()); //CHANGE!!
         }
 
         blockChain.add(block);
+        currentBlockIndex.getAndIncrement();//CHANGE!!
         //Updates the hashcode prefix rules according to the time needed to generate the block(if it's less than 60 seconds it increases the complexity of the prefix otherwise it decreases it)
         regulateBlockCreation(block);
 
@@ -109,22 +115,24 @@ public class BlockChain {
     }
 
     public synchronized int getBlockIndex() {
-        int currentListSize = this.blockChain.size();
-
-        //Empty list scenario
-        if (currentListSize == 0) {
-            return 1;
-        }
-
-        Block lastBlock = this.blockChain.get(currentListSize - 1);
-
-        if (lastBlock == null) {
-            return 1;
-        }
+//        int currentListSize = this.blockChain.size();
+//
+//        //Empty list scenario
+//        if (currentListSize == 0) {
+//            return 1;
+//        }
+//
+//        Block lastBlock = this.blockChain.get(currentListSize - 1);
+//
+//        if (lastBlock == null) {
+//            return 1;
+//        }
 
         //ID generation when the blockchain contains at least an element
-        int previousBlockId = lastBlock.getId();
-        int newBlockId = previousBlockId + 1;
+//        int previousBlockId = lastBlock.getId();
+        //int newBlockId = previousBlockId + 1;
+        int newBlockId = currentBlockIndex.get();//CHANGE!!
+        //int newBlockId = blockChain.size() + 1;
 
         return newBlockId;
     }
@@ -148,8 +156,8 @@ public class BlockChain {
     }
 
     public synchronized int getSize() {
-        return this.blockChain.size();
-        //return blockChainSize;
+        //return this.blockChain.size();
+        return currentBlockIndex.get();//CHANGE!!
     }
 
     private void regulateBlockCreation(Block newBlock) {
@@ -173,6 +181,8 @@ public class BlockChain {
         }
 
         newBlock.setAdditionalInfo(message);
+        //Clears the message list if a new block was successfully generated
+        messageList.clear();
     }
 
     public int getPrefixLength() {
@@ -185,6 +195,13 @@ public class BlockChain {
 
     public synchronized void addMessage(String newMessage) {
         messageList.add(newMessage);
+    }
+
+    public synchronized String getMessage() {
+        System.out.println("MESSAGE LIST SIZE: " + messageList.size());
+        return this.messageList
+                .stream()
+                .reduce("", (x, y) -> x + y + "\n");
     }
 
 
