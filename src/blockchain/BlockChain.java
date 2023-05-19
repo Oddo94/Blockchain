@@ -25,26 +25,18 @@ public class BlockChain {
     }
 
     public synchronized void addBlock(Block block) {
-//        if (currentBlockIndex.get() == 6) {
-//            System.out.println("MAXIMUM BLOCKCHAIN SIZE REACHED!");
-//            return;
-//        }
-
         int currentBlockId = block.getId();
-//        int newId = blockChain.size() + 1;
-        int newId = currentBlockIndex.get();//CHANGE!!
+        int newId = currentBlockIndex.get();
 
         //Checks again to make sure that the id of the new block is correct
         if(currentBlockId != newId) {
-            //block.setId(newId);
-            block.setId(currentBlockIndex.get()); //CHANGE!!
+            block.setId(currentBlockIndex.get());
         }
 
         blockChain.add(block);
-        currentBlockIndex.getAndIncrement();//CHANGE!!
+        currentBlockIndex.getAndIncrement();
         //Updates the hashcode prefix rules according to the time needed to generate the block(if it's less than 60 seconds it increases the complexity of the prefix otherwise it decreases it)
         regulateBlockCreation(block);
-
     }
 
     public void display() {
@@ -115,24 +107,7 @@ public class BlockChain {
     }
 
     public synchronized int getBlockIndex() {
-//        int currentListSize = this.blockChain.size();
-//
-//        //Empty list scenario
-//        if (currentListSize == 0) {
-//            return 1;
-//        }
-//
-//        Block lastBlock = this.blockChain.get(currentListSize - 1);
-//
-//        if (lastBlock == null) {
-//            return 1;
-//        }
-
-        //ID generation when the blockchain contains at least an element
-//        int previousBlockId = lastBlock.getId();
-        //int newBlockId = previousBlockId + 1;
         int newBlockId = currentBlockIndex.get();//CHANGE!!
-        //int newBlockId = blockChain.size() + 1;
 
         return newBlockId;
     }
@@ -156,8 +131,7 @@ public class BlockChain {
     }
 
     public synchronized int getSize() {
-        //return this.blockChain.size();
-        return currentBlockIndex.get();//CHANGE!!
+        return currentBlockIndex.get();
     }
 
     private void regulateBlockCreation(Block newBlock) {

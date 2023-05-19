@@ -3,7 +3,7 @@ package blockchain;
 public class Main {
     public static void main(String[] args) {
         int blockChainSize = 5;
-        int numberOfThreads = 100;
+        int numberOfThreads = 1000;
 
         BlockChainManager blockChainManager = new BlockChainManager(blockChainSize, numberOfThreads);
         blockChainManager.manageBlockChain();

@@ -14,50 +14,19 @@ public class BlockChainManager {
     private int numberOfThreads;
 
     public BlockChainManager(int blockChainSize, int numberOfThreads) {
-//        if(blockChainSize <= 0) {
-//            this.maxSize = 1;
-//        }
+        if(blockChainSize <= 0) {
+            this.maxSize = 1;
+        } else {
+            this.maxSize = blockChainSize;
+        }
 
         int availableThreads = Runtime.getRuntime().availableProcessors();
 
-        this.maxSize = blockChainSize;
-//        this.maxSize = 5;
         this.blockChain = new BlockChain();
         this.numberOfThreads = numberOfThreads > availableThreads ? availableThreads : numberOfThreads;
     }
 
-    //ORIGINAL VERSION
-//    public void manageBlockChain() {
-//        int currentBlockChainSize = blockChain.getSize();
-//        ExecutorService threadPool = Executors.newFixedThreadPool(numberOfThreads);
-//        for(int i = 0; i < numberOfThreads; i++) {
-////            if(i == 4) {
-////                MessageGenerator messageGenerator = new MessageGenerator(blockChain);
-////                threadPool.execute(messageGenerator);
-////            }
-//
-//            BlockGenerator blockGenerator = new BlockGenerator(blockChain, maxSize);
-//            threadPool.execute(blockGenerator);
-//
-//        }
-//        blockChain.display();
-//        threadPool.shutdown();
-//
-//        try {
-//            if(!threadPool.awaitTermination(10, TimeUnit.SECONDS)) {
-//               threadPool.shutdownNow();
-//            }
-//        } catch (InterruptedException ex) {
-//            threadPool.shutdownNow();
-//            Thread.currentThread().interrupt();
-//        }
-//
-//
-//    }
-
-    //TEST VERSION
     public void manageBlockChain() {
-        //int currentBlockChainSize = blockChain.getSize();
         ExecutorService threadPool = Executors.newFixedThreadPool(numberOfThreads);
         IntStream.range(1, numberOfThreads + 1)
                 .mapToObj(i -> new BlockGenerator(blockChain, maxSize))
@@ -66,7 +35,7 @@ public class BlockChainManager {
         threadPool.shutdown();
 
         try {
-            threadPool.awaitTermination(5, TimeUnit.SECONDS);
+            threadPool.awaitTermination(10, TimeUnit.SECONDS);
         } catch(InterruptedException ex) {
             ex.printStackTrace();
         }

@@ -11,15 +11,8 @@ import java.util.regex.Pattern;
 
 @AllArgsConstructor
 public class BlockGenerator implements Runnable {
-//    int iterations = 1;
-//    CountDownLatch latch;
     private BlockChain blockChain;
     private int maxSize;
-
-//    public BlockGenerator(int iterations, CountDownLatch latch) {
-//        this.iterations = iterations;
-//        this.latch = latch;
-//    }
 
     @Override
     public void run() {
